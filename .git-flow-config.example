@@ -1,0 +1,24 @@
+# Git Flow CLI Configuration Example
+# Copy this file to ~/.git-flow-config and customize as needed
+
+# Branch configuration
+DEVELOP_BRANCH="develop"
+PRODUCTION_BRANCH="main"
+
+# Build configuration
+RUN_BUILD=true
+BUILD_COMMAND="npm ci && npm run build"
+
+# Remote configuration
+REMOTE="origin"
+
+# User interaction
+DEFAULT_CONFIRM=true
+
+# Example custom configurations:
+# DEVELOP_BRANCH="dev"
+# PRODUCTION_BRANCH="master"
+# RUN_BUILD=false
+# BUILD_COMMAND="yarn build && yarn test"
+# REMOTE="upstream"
+# DEFAULT_CONFIRM=false

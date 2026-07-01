@@ -1,0 +1,48 @@
+# Git Flow CLI .gitignore
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Backup files
+*.backup.*
+*.bak
+
+# Test directories
+test/
+tests/
+*.test
+
+# Node modules (if running build commands)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Temporary files
+*.tmp
+*.temp
+
+# Local configuration (keep template)
+.git-flow-config
+!.git-flow-config.example
+
+# Installation artifacts
+*.tar.gz
+*.zip
+
+# Documentation build
+docs/_build/
+site/
