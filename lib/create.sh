@@ -87,7 +87,10 @@ create_branch() {
     pull_branch "$base_branch"
     
     # Create new branch
-    create_branch "$base_branch" "$full_branch_name"
+    git checkout -b "$full_branch_name" || {
+        error "Failed to create branch '$full_branch_name' from '$base_branch'"
+        return 1
+    }
     
     # Push new branch to remote and set up upstream
     push_branch "$full_branch_name" true

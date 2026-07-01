@@ -32,7 +32,7 @@ init_git_flow() {
         pull_branch "$production_branch" || return 1
         
         # Create develop branch from production
-        create_branch "$DEVELOP_BRANCH" "$production_branch" || return 1
+        create_branch_from_base "$production_branch" "$DEVELOP_BRANCH" || return 1
         
         # Push develop branch
         push_branch "$DEVELOP_BRANCH" || return 1

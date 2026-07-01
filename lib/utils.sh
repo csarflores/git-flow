@@ -119,7 +119,7 @@ push_branch() {
     fi
 }
 
-create_branch() {
+create_branch_from_base() {
     local base_branch="$1"
     local new_branch="$2"
     
