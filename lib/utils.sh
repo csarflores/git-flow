@@ -253,6 +253,53 @@ get_project_name() {
     basename "$(git rev-parse --show-toplevel)"
 }
 
+# Auto-detect production branch for current project
+detect_production_branch() {
+    local detected_branch=""
+    
+    # Check if main exists locally or remotely
+    if branch_exists "main" || remote_branch_exists "main"; then
+        detected_branch="main"
+    fi
+    
+    # Check if master exists locally or remotely
+    if branch_exists "master" || remote_branch_exists "master"; then
+        if [[ -n "$detected_branch" ]]; then
+            # Both exist, prefer main by default but allow override
+            warning "Both 'main' and 'master' branches detected. Using 'main' as production branch."
+            warning "You can override this in ~/.git-flow-config with PRODUCTION_BRANCH=\"master\""
+        else
+            detected_branch="master"
+        fi
+    fi
+    
+    # If no production branch found, use default
+    if [[ -z "$detected_branch" ]]; then
+        detected_branch="$PRODUCTION_BRANCH"
+        warning "No production branch detected. Using default: $detected_branch"
+        info "You may need to create '$detected_branch' branch first."
+    fi
+    
+    echo "$detected_branch"
+}
+
+# Get production branch (auto-detected or configured)
+get_production_branch() {
+    # Check if user has overridden production branch in config
+    local user_config="$HOME/.git-flow-config"
+    if [[ -f "$user_config" ]]; then
+        local user_branch
+        user_branch=$(grep "^PRODUCTION_BRANCH=" "$user_config" 2>/dev/null | cut -d'=' -f2 | tr -d '"')
+        if [[ -n "$user_branch" ]]; then
+            echo "$user_branch"
+            return
+        fi
+    fi
+    
+    # Auto-detect
+    detect_production_branch
+}
+
 get_remote_url() {
     git remote get-url "$REMOTE" 2>/dev/null || echo "No remote configured"
 }

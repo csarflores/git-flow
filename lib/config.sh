@@ -5,7 +5,7 @@
 
 # Branch configuration
 DEVELOP_BRANCH="develop"
-PRODUCTION_BRANCH="main"
+PRODUCTION_BRANCH="main"  # Default, will be auto-detected per project
 
 # Build configuration
 RUN_BUILD=true

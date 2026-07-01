@@ -104,6 +104,8 @@ close_release() {
 close_hotfix() {
     local branch="$1"
     local commit_message="$2"
+    local production_branch
+    production_branch=$(get_production_branch)
     
     info "Processing hotfix branch: $branch"
     
@@ -116,15 +118,15 @@ close_hotfix() {
     fi
     
     # Merge to production branch
-    local production_merge_message="Merge $branch into $PRODUCTION_BRANCH"
-    merge_branch "$branch" "$PRODUCTION_BRANCH" "$production_merge_message" || return 1
+    local production_merge_message="Merge $branch into $production_branch"
+    merge_branch "$branch" "$production_branch" "$production_merge_message" || return 1
     
     # Push production branch
-    push_branch "$PRODUCTION_BRANCH"
+    push_branch "$production_branch"
     
     # Merge production back to develop
-    local develop_merge_message="Merge $PRODUCTION_BRANCH into $DEVELOP_BRANCH (hotfix: $branch)"
-    merge_branch "$PRODUCTION_BRANCH" "$DEVELOP_BRANCH" "$develop_merge_message" || return 1
+    local develop_merge_message="Merge $production_branch into $DEVELOP_BRANCH (hotfix: $branch)"
+    merge_branch "$production_branch" "$DEVELOP_BRANCH" "$develop_merge_message" || return 1
     
     # Push develop branch
     push_branch "$DEVELOP_BRANCH"
@@ -136,7 +138,7 @@ close_hotfix() {
     switch_to_branch "$DEVELOP_BRANCH"
     
     success "$branch closed successfully!"
-    info "Changes merged to both $PRODUCTION_BRANCH and $DEVELOP_BRANCH"
+    info "Changes merged to both $production_branch and $DEVELOP_BRANCH"
 }
 
 # List available close commands

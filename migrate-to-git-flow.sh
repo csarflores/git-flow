@@ -1,0 +1,295 @@
+#!/bin/bash
+
+# Git Flow Migration Script
+# Migrates existing projects to Git Flow with automatic production branch detection
+
+set -euo pipefail
+
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+CYAN='\033[0;36m'
+WHITE='\033[1;37m'
+NC='\033[0m' # No Color
+
+# Output functions
+info() {
+    echo -e "${BLUE}[INFO]${NC} $1"
+}
+
+success() {
+    echo -e "${GREEN}[SUCCESS]${NC} $1"
+}
+
+warning() {
+    echo -e "${YELLOW}[WARNING]${NC} $1"
+}
+
+error() {
+    echo -e "${RED}[ERROR]${NC} $1" >&2
+}
+
+# Check if we're in a git repository
+check_git_repo() {
+    if ! git rev-parse --git-dir > /dev/null 2>&1; then
+        error "This is not a git repository"
+        return 1
+    fi
+}
+
+# Detect production branch
+detect_production_branch() {
+    local detected_branch=""
+    
+    # Check if main exists locally or remotely
+    if git show-ref --verify --quiet refs/heads/main 2>/dev/null || \
+       git show-ref --verify --quiet refs/remotes/origin/main 2>/dev/null; then
+        detected_branch="main"
+    fi
+    
+    # Check if master exists locally or remotely
+    if git show-ref --verify --quiet refs/heads/master 2>/dev/null || \
+       git show-ref --verify --quiet refs/remotes/origin/master 2>/dev/null; then
+        if [[ -n "$detected_branch" ]]; then
+            # Both exist, prefer main by default
+            warning "Both 'main' and 'master' branches detected. Using 'main' as production branch."
+        else
+            detected_branch="master"
+        fi
+    fi
+    
+    if [[ -z "$detected_branch" ]]; then
+        error "No production branch (main/master) found"
+        return 1
+    fi
+    
+    echo "$detected_branch"
+}
+
+# Check if develop branch exists
+check_develop_branch() {
+    if git show-ref --verify --quiet refs/heads/develop 2>/dev/null || \
+       git show-ref --verify --quiet refs/remotes/origin/develop 2>/dev/null; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+# Create develop branch
+create_develop_branch() {
+    local production_branch="$1"
+    
+    info "Creating develop branch from $production_branch..."
+    
+    # Ensure we're on production branch and it's up to date
+    git checkout "$production_branch"
+    git pull origin "$production_branch"
+    
+    # Create develop branch
+    git checkout -b develop
+    
+    # Push to remote
+    git push -u origin develop
+    
+    success "Develop branch created successfully!"
+}
+
+# Show project status
+show_project_status() {
+    local project_name
+    project_name=$(basename "$(pwd)")
+    
+    echo
+    echo -e "${CYAN}╔══════════════════════════════════════════════════════════════╗${NC}"
+    echo -e "${CYAN}║${NC}           ${WHITE}Project: $project_name${NC}           ${CYAN}║${NC}"
+    echo -e "${CYAN}╚══════════════════════════════════════════════════════════════╝${NC}"
+    echo
+    
+    # Show branches
+    echo -e "${WHITE}📋 Current Branches:${NC}"
+    git branch -a | sed 's/^/  /'
+    echo
+    
+    # Show current branch
+    echo -e "${WHITE}🌿 Current Branch:${NC} $(git rev-parse --abbrev-ref HEAD)"
+    echo
+    
+    # Detect production branch
+    local production_branch
+    if production_branch=$(detect_production_branch); then
+        echo -e "${WHITE}🏭 Production Branch:${NC} $production_branch"
+    else
+        echo -e "${RED}❌ Production Branch:${NC} Not found"
+        return 1
+    fi
+    
+    # Check develop branch
+    if check_develop_branch; then
+        echo -e "${WHITE}🔧 Develop Branch:${NC} ${GREEN}Exists${NC}"
+    else
+        echo -e "${WHITE}🔧 Develop Branch:${NC} ${YELLOW}Not found${NC}"
+    fi
+    
+    echo
+}
+
+# Migrate single project
+migrate_project() {
+    local project_path="$1"
+    
+    if [[ -n "$project_path" ]]; then
+        cd "$project_path"
+    fi
+    
+    info "Migrating project: $(basename "$(pwd)")"
+    
+    check_git_repo || return 1
+    
+    # Show current status
+    show_project_status
+    
+    # Detect production branch
+    local production_branch
+    if ! production_branch=$(detect_production_branch); then
+        error "Cannot detect production branch. Please create 'main' or 'master' branch first."
+        return 1
+    fi
+    
+    # Check if develop exists
+    if check_develop_branch; then
+        info "Develop branch already exists. Skipping creation."
+    else
+        echo
+        if confirm "Create develop branch from $production_branch?"; then
+            create_develop_branch "$production_branch"
+        else
+            info "Skipping develop branch creation."
+        fi
+    fi
+    
+    # Create project-specific config
+    create_project_config "$production_branch"
+    
+    success "Project migration completed!"
+    echo
+}
+
+# Create project-specific configuration
+create_project_config() {
+    local production_branch="$1"
+    local project_name
+    project_name=$(basename "$(pwd)")
+    local config_file=".git-flow-project"
+    
+    cat > "$config_file" << EOF
+# Git Flow Configuration for $project_name
+# This file is automatically generated during migration
+
+# Production branch for this project
+PRODUCTION_BRANCH="$production_branch"
+
+# Develop branch (standard)
+DEVELOP_BRANCH="develop"
+
+# Remote
+REMOTE="origin"
+
+# Build settings (customize as needed)
+RUN_BUILD=false
+BUILD_COMMAND="echo 'No build configured for this project'"
+
+# Default confirmation
+DEFAULT_CONFIRM=true
+EOF
+    
+    info "Created project configuration: $config_file"
+    info "You can customize these settings as needed."
+}
+
+# Confirmation function
+confirm() {
+    local message="$1"
+    read -p "$(echo -e "${YELLOW}$message [Y/n]:${NC} ")" -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Nn]$ ]]; then
+        return 1
+    fi
+    return 0
+}
+
+# Show usage
+show_usage() {
+    echo "Git Flow Migration Script"
+    echo
+    echo "Usage:"
+    echo "  $0                    # Migrate current directory"
+    echo "  $0 <project-path>     # Migrate specific project"
+    echo "  $0 --all              # Migrate all projects in current directory"
+    echo "  $0 --status           # Show status of current project"
+    echo
+    echo "Examples:"
+    echo "  $0 ~/projects/my-app"
+    echo "  $0 --all"
+    echo "  $0 --status"
+}
+
+# Migrate all projects in current directory
+migrate_all_projects() {
+    info "Migrating all projects in current directory..."
+    
+    for dir in */; do
+        if [[ -d "$dir" ]]; then
+            cd "$dir"
+            if git rev-parse --git-dir > /dev/null 2>&1; then
+                echo
+                echo -e "${CYAN}=== Processing project: $dir ===${NC}"
+                migrate_project
+            else
+                info "Skipping $dir (not a git repository)"
+            fi
+            cd ..
+        fi
+    done
+}
+
+# Main function
+main() {
+    local target="${1:-}"
+    
+    case "$target" in
+        --help|-h)
+            show_usage
+            exit 0
+            ;;
+        --status)
+            check_git_repo || exit 1
+            show_project_status
+            exit 0
+            ;;
+        --all)
+            migrate_all_projects
+            exit 0
+            ;;
+        "")
+            # Migrate current directory
+            migrate_project
+            ;;
+        *)
+            # Migrate specific project
+            if [[ -d "$target" ]]; then
+                migrate_project "$target"
+            else
+                error "Directory not found: $target"
+                echo
+                show_usage
+                exit 1
+            fi
+            ;;
+    esac
+}
+
+# Run main function
+main "$@"

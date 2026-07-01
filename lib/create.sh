@@ -58,7 +58,7 @@ create_branch() {
             base_branch="$DEVELOP_BRANCH"
             ;;
         hotfix)
-            base_branch="$PRODUCTION_BRANCH"
+            base_branch=$(get_production_branch)
             ;;
     esac
     

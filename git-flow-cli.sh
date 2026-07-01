@@ -1,41 +1,28 @@
 #!/bin/bash
 
-# Git Flow CLI Tool
-# Professional Git Flow workflow automation
+# Git Flow CLI - Main entry point
+# This script is called by Git alias
 
-set -euo pipefail
-
-# Version
-VERSION="1.0.0"
-
-# Get script directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 LIB_DIR="$SCRIPT_DIR/lib"
 
 # Load all library files
-# shellcheck source=lib/config.sh
 source "$LIB_DIR/config.sh"
-# shellcheck source=lib/utils.sh
 source "$LIB_DIR/utils.sh"
-# shellcheck source=lib/create.sh
 source "$LIB_DIR/create.sh"
-# shellcheck source=lib/close.sh
 source "$LIB_DIR/close.sh"
-# shellcheck source=lib/deploy.sh
 source "$LIB_DIR/deploy.sh"
-# shellcheck source=lib/sync.sh
 source "$LIB_DIR/sync.sh"
-# shellcheck source=lib/status.sh
 source "$LIB_DIR/status.sh"
-# shellcheck source=lib/init.sh
 source "$LIB_DIR/init.sh"
-# shellcheck source=lib/help.sh
 source "$LIB_DIR/help.sh"
+
+# Version
+VERSION="1.0.0"
 
 # Debug mode
 if [[ "${GIT_FLOW_DEBUG:-}" == "1" ]]; then
     set -x
-    info "Debug mode enabled"
 fi
 
 # Main function
@@ -74,7 +61,7 @@ main() {
             handle_deploy_command "$arg1"
             ;;
         sync|sincronizar)
-            handle_sync_command "$arg1" "$@"  # Pass all remaining args
+            handle_sync_command "$arg1" "$@"
             ;;
         status|estado)
             handle_status_command "$arg1"
@@ -159,7 +146,6 @@ handle_sync_command() {
     elif [[ -z "$first_arg" ]]; then
         sync_repository
     else
-        # Pass all arguments as branch names
         sync_specific_branches "$@"
     fi
 }
@@ -176,6 +162,4 @@ handle_status_command() {
 }
 
 # Script entry point
-if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-    main "$@"
-fi
+main "$@"

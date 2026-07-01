@@ -34,6 +34,9 @@ show_help() {
             config|configuracion)
                 show_config_help
                 ;;
+            init|inicializar)
+                show_init_help
+                ;;
             install|instalar)
                 show_install_help
                 ;;
@@ -68,6 +71,7 @@ show_general_help() {
     echo "  git flow <command> [options] [arguments]"
     echo
     echo -e "${YELLOW}CORE COMMANDS:${NC}"
+    echo "  init                     Initialize Git Flow in current project"
     echo "  crear <type> <name>      Create a new branch (feature, fix, release, hotfix)"
     echo "  cerrar [message]         Close current branch and merge to target"
     echo "  deploy [message]         Deploy develop to production"

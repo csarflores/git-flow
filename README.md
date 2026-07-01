@@ -21,34 +21,35 @@ A professional Git Flow workflow automation tool that simplifies branch manageme
 
 ## 🔧 Installation
 
-### One-Line Install (Recommended)
+### Windows (Recommended)
 
-```bash
-curl -fsSL https://raw.githubusercontent.com/TU_USERNAME/git-flow-cli/main/install-remote.sh | bash
+```cmd
+# Clone the repository
+git clone https://github.com/csarflores/git-flow.git
+cd git-flow
+
+# Run the Windows installer
+install-windows.cmd
 ```
 
-### Quick Install
+Then restart Git Bash.
+
+### macOS / Linux
 
 ```bash
 # Clone the repository
-git clone https://github.com/TU_USERNAME/git-flow-cli.git
-cd git-flow-cli
+git clone https://github.com/csarflores/git-flow.git
+cd git-flow
 
 # Run the installer
 ./install.sh
 ```
 
-### Manual Install
-
-1. Copy the `git-flow` script to your PATH
-2. Make it executable: `chmod +x git-flow`
-3. Ensure the script is accessible as `git flow`
-
 ### Verify Installation
 
 ```bash
-git flow --help
-git flow version
+git help-flow
+git status-flow
 ```
 
 ## ⚙️ Configuration
@@ -75,81 +76,79 @@ DEFAULT_CONFIRM=true
 
 ### Core Commands
 
+#### Initialize Git Flow in a Project
+
+```bash
+# Run inside any project (new or existing)
+git init-flow
+```
+
 #### Create Branches
 
 ```bash
 # Create feature branch
-git flow crear feature login-google
+git crear-feature login-google
 
 # Create fix branch
-git flow crear fix error-email
+git crear-fix error-email
 
 # Create release branch
-git flow crear release 2.5.0
+git crear-release 2.5.0
 
 # Create hotfix branch
-git flow crear hotfix error-pagos
+git crear-hotfix error-pagos
 ```
 
 #### Close Branches
 
 ```bash
 # Close current branch (auto-detects type)
-git flow cerrar
+git cerrar
 
 # Close with custom commit message
-git flow cerrar "Complete user authentication"
+git cerrar "Complete user authentication"
 ```
 
 #### Deploy
 
 ```bash
 # Deploy develop to production
-git flow deploy
+git deploy
 
 # Deploy with custom message
-git flow deploy "Release v2.1.0"
+git deploy "Release v2.1.0"
 ```
 
 #### Synchronize
 
 ```bash
 # Sync all main branches
-git flow sync
-
-# Sync specific branches
-git flow sync feature/login feature/payment
-
-# Sync only current branch
-git flow sync --current
+git sync
 
 # Show sync status
-git flow sync --status
+git sync --status
 ```
 
 #### Status
 
 ```bash
 # Show comprehensive status
-git flow status
+git status-flow
 
 # Show compact status
-git flow status --compact
+git status-flow --compact
 ```
 
 ### Utility Commands
 
 ```bash
 # Show help
-git flow help
-git flow help crear
-git flow help examples
+git help-flow
+git help-flow crear
+git help-flow examples
 
 # Show version
-git flow version
-
-# Show configuration
-git flow config
+git help-flow version
 ```
 
 ## 🌿 Git Flow Workflow
@@ -157,24 +156,25 @@ git flow config
 ### Branch Types
 
 - **`develop`**: Main development branch
-- **`main`**: Production-ready code
+- **`main` or `master`**: Production-ready code (auto-detected per project)
 - **`feature/*`**: New features (from develop → develop)
 - **`fix/*`**: Bug fixes (from develop → develop)
 - **`release/*`**: Release preparation (from develop → develop)
-- **`hotfix/*`**: Emergency fixes (from main → main + develop)
+- **`hotfix/*`**: Emergency fixes (from production → production + develop)
 
 ### Typical Workflow
 
-1. **Start Feature**: `git flow crear feature user-auth`
-2. **Develop**: Make changes, commit, push
-3. **Complete**: `git flow cerrar "Add user authentication"`
-4. **Deploy**: `git flow deploy "Release v2.1.0"`
+1. **Initialize**: `git init-flow`
+2. **Start Feature**: `git crear-feature user-auth`
+3. **Develop**: Make changes, commit, push
+4. **Complete**: `git cerrar "Add user authentication"`
+5. **Deploy**: `git deploy "Release v2.1.0"`
 
 ### Hotfix Workflow
 
-1. **Create Hotfix**: `git flow crear hotfix security-patch`
+1. **Create Hotfix**: `git crear-hotfix security-patch`
 2. **Fix Issue**: Make changes, commit
-3. **Apply**: `git flow cerrar "Fix security vulnerability"`
+3. **Apply**: `git cerrar "Fix security vulnerability"`
 4. **Deploy**: Automatically deployed to production
 
 ## 📊 Status Display
@@ -195,8 +195,11 @@ The `git flow status` command shows:
 ### Daily Development
 
 ```bash
+# Initialize project (run once)
+git init-flow
+
 # Start new feature
-git flow crear feature payment-gateway
+git crear-feature payment-gateway
 
 # Work on feature
 git add .
@@ -204,17 +207,17 @@ git commit -m "Add payment gateway integration"
 git push
 
 # Complete feature
-git flow cerrar "Integrate payment gateway"
+git cerrar "Integrate payment gateway"
 
 # Deploy to production
-git flow deploy "Release payment gateway"
+git deploy "Release payment gateway"
 ```
 
 ### Bug Fix
 
 ```bash
 # Create fix branch
-git flow crear fix login-validation
+git crear-fix login-validation
 
 # Fix the bug
 git add .
@@ -222,20 +225,17 @@ git commit -m "Fix login validation error"
 git push
 
 # Close fix
-git flow cerrar "Fix login validation"
+git cerrar "Fix login validation"
 ```
 
 ### Team Collaboration
 
 ```bash
 # Sync with team
-git flow sync
+git sync
 
 # Check repository status
-git flow status
-
-# Sync specific branches
-git flow sync feature/profile feature/settings
+git status-flow
 ```
 
 ## 🔧 Advanced Usage
@@ -245,9 +245,9 @@ git flow sync feature/profile feature/settings
 Override configuration temporarily:
 
 ```bash
-GIT_FLOW_DEVELOP_BRANCH="dev" git flow crear feature test
-GIT_FLOW_REMOTE="upstream" git flow sync
-GIT_FLOW_DEBUG=1 git flow status
+GIT_FLOW_DEVELOP_BRANCH="dev" git crear-feature test
+GIT_FLOW_REMOTE="upstream" git sync
+GIT_FLOW_DEBUG=1 git status-flow
 ```
 
 ### Build Integration
