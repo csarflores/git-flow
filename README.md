@@ -21,12 +21,18 @@ A professional Git Flow workflow automation tool that simplifies branch manageme
 
 ## 🔧 Installation
 
+### One-Line Install (Recommended)
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/TU_USERNAME/git-flow-cli/main/install-remote.sh | bash
+```
+
 ### Quick Install
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/git-flow.git
-cd git-flow
+git clone https://github.com/TU_USERNAME/git-flow-cli.git
+cd git-flow-cli
 
 # Run the installer
 ./install.sh
