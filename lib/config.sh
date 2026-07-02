@@ -9,7 +9,7 @@ PRODUCTION_BRANCH="main"  # Default, will be auto-detected per project
 
 # Build configuration
 RUN_BUILD=true
-BUILD_COMMAND="npm ci && npm run build"
+BUILD_COMMAND="npm run build"
 
 # Remote configuration
 REMOTE="origin"
