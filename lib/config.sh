@@ -27,6 +27,12 @@ CYAN='\033[0;36m'
 WHITE='\033[1;37m'
 NC='\033[0m' # No Color
 
+# Load configuration from project config file if exists
+if [[ -f ".git-flow-project" ]]; then
+    # shellcheck source=/dev/null
+    source ".git-flow-project"
+fi
+
 # Load configuration from user config file if exists
 if [[ -f "$HOME/.git-flow-config" ]]; then
     # shellcheck source=/dev/null
